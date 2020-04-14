@@ -5,8 +5,11 @@
 #define FILE_MENU_NEW 1
 #define FILE_MENU_OPEN 2
 #define FILE_MENU_EXIT 3
-#define JOB_APPLICATION 4
-#define LEAVE_APPLICATION 5
+#define HELP_MENU 4
+#define JOB_APPLICATION 5
+#define LEAVE_APPLICATION 6
+#define EVENT_INVITATION 7
+
 //#define CHANGE_TITLE 4
 
 //the main window procedure prototype
@@ -20,7 +23,7 @@ void registerDialogClass(HINSTANCE);
 void displayDialog(HWND);
 
 //window handlers
-HWND hName, hOut, hLogo, hMainWindow, hSubject, hRecipient, hPortal, hRole, hInstitute, hMarks, hStream, hStartdate, hEnddate;
+HWND hName, hOut, hLogo, hMainWindow, hSubject, hRecipient, hPortal, hRole, hInstitute, hMarks, hStream, hStartdate, hEnddate, hEvent, hTime, hCompany, hPlace, hUrCompany;
 
 HMENU hMenu;
 HBITMAP hLogoImage;
@@ -71,6 +74,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
     case WM_COMMAND:
         switch(wp)
         {
+
         case FILE_MENU_EXIT:
             val = MessageBoxW(hWnd, L"Do you really want to exit?", L"Wait!", MB_YESNO | MB_ICONEXCLAMATION);
             if(val == IDYES)
@@ -86,6 +90,12 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
             displayDialog(hWnd);
             MessageBeep(MB_ICONINFORMATION);
             break;
+        case HELP_MENU:
+            {
+                wchar_t help[1000] = L"In this application, all you have to do is enter the details and click the desired button. An application prototype will be displayed in the message box according to the button you pressed. This application can be further developed by including various formats of applications and letters. PS: Bugs to be fixed: 1. On clicking any generate button, the application doesn't get displayed in the message box at once; the message box has to be clicked twice to display the text. 2. The application isn't responsive according to screen size yet";
+                MessageBoxW(NULL, help, L"HELP!", MB_OK);
+                break;
+            }
         case JOB_APPLICATION:
             char name[30], subject[200], recipient[50], portal[100], role[100], institute[100], stream[100], marks[10], out[1000];
 
@@ -173,6 +183,36 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 
             SetWindowText(hOut, out);
             break;
+        case EVENT_INVITATION:
+            char company[100], time[30], event[100], place[100], yourCompany[100];
+            GetWindowText(hCompany, company, 100);
+            GetWindowText(hEvent, event, 100);
+            GetWindowText(hTime, time, 30);
+            GetWindowText(hPlace, place, 100);
+            GetWindowText(hUrCompany, yourCompany, 100);
+            strcpy(out, "From \n");
+            strcat(out, name);
+            strcat(out, "To \n");
+            strcat(out, recipient);
+            strcat(out, "Subject: Business Event Invitation Letter.\nDear _____(Sir or Madam),");
+            strcat(out, "It is a pleasure to invite you to attend the ");
+            strcat(out, event);
+            strcat(out, " located at ");
+            strcat(out, place);
+            strcat(out, " on ");
+            strcat(out, startdate);
+            strcat(out, " at ");
+            strcat(out, time);
+            strcat(out, ".\n As one of ");
+            strcat(out, company);
+            strcat(out, " esteemed business associates, it would be our honour to have your presence at this auspicious event. It is also an opportunity to thank you  for the splendid business partnership that both companies have enjoyed over the past years.I do hope that you will be able to confirm your attendance to this invitation on or before ");
+            strcat(out, enddate);
+            strcat(out, " by just mailing us at our official email ID. \nLooking forward to your presence at this celebration,\nYours truly,\n");
+            strcat(out, name);
+            strcat(out, yourCompany);
+
+            SetWindowText(hOut, out);
+            break;
         default:
             return DefWindowProcW(hWnd, msg, wp, lp);
        // case CHANGE_TITLE:
@@ -210,7 +250,7 @@ void AddMenus(HWND hWnd)
     AppendMenu(hFileMenu, MF_STRING, FILE_MENU_EXIT, "Exit");
 
     AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hFileMenu, "File");
-    AppendMenu(hMenu, MF_STRING, NULL, "Help");
+    AppendMenu(hMenu, MF_STRING, HELP_MENU, "Help");
     SetMenu(hWnd, hMenu);
 }
 
@@ -241,12 +281,23 @@ void AddControls(HWND hWnd)
     hStartdate = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 500, 50, 98, 38, hWnd, NULL, NULL, NULL);
     CreateWindowW(L"Static", L"End Date (leave): ", WS_VISIBLE | WS_CHILD, 400, 90, 98, 38, hWnd, NULL, NULL, NULL);
     hEnddate = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 500, 90, 98, 38, hWnd, NULL, NULL, NULL);
+    CreateWindowW(L"Static", L"Event (invitation): ", WS_VISIBLE | WS_CHILD, 400, 130, 98, 38, hWnd, NULL, NULL, NULL);
+    hEvent = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 500, 130, 98, 38, hWnd, NULL, NULL, NULL);
+    CreateWindowW(L"Static", L"Time (invitation): ", WS_VISIBLE | WS_CHILD, 400, 170, 98, 38, hWnd, NULL, NULL, NULL);
+    hTime = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 500, 170, 98, 38, hWnd, NULL, NULL, NULL);
+    CreateWindowW(L"Static", L"Company Name: ", WS_VISIBLE | WS_CHILD, 400, 210, 98, 38, hWnd, NULL, NULL, NULL);
+    hCompany = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 500, 210, 98, 38, hWnd, NULL, NULL, NULL);
+    CreateWindowW(L"Static", L"Venue: ", WS_VISIBLE | WS_CHILD, 400, 250, 98, 38, hWnd, NULL, NULL, NULL);
+    hPlace = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 500, 250, 98, 38, hWnd, NULL, NULL, NULL);
+    CreateWindowW(L"Static", L"Your Company: ", WS_VISIBLE | WS_CHILD, 400, 290, 98, 38, hWnd, NULL, NULL, NULL);
+    hUrCompany = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL, 500, 290, 98, 38, hWnd, NULL, NULL, NULL);
 
     //CreateWindowW(L"Static", L"Age: ", WS_VISIBLE | WS_CHILD, 100, 90, 98, 38, hWnd, NULL, NULL, NULL);
     //hAge = CreateWindowW(L"Edit", L"", WS_VISIBLE | WS_CHILD | WS_BORDER, 200, 90, 98, 38, hWnd, NULL, NULL, NULL);
 
     CreateWindowW(L"Button", L"Job Application", WS_VISIBLE | WS_CHILD, 100, 380, 110, 38, hWnd, (HMENU)JOB_APPLICATION, NULL, NULL);
     CreateWindowW(L"Button", L"Leave", WS_VISIBLE | WS_CHILD, 220, 380, 110, 38, hWnd, (HMENU)LEAVE_APPLICATION, NULL, NULL);
+    CreateWindowW(L"Button", L"Invitation", WS_VISIBLE | WS_CHILD, 340, 380, 110, 38, hWnd, (HMENU)EVENT_INVITATION, NULL, NULL);
    // CreateWindowW(L"Button", L"Job Application", WS_VISIBLE | WS_CHILD, 340, 380, 110, 38, hWnd, (HMENU)GENERATE_BUTTON, NULL, NULL);
     //CreateWindowW(L"Button", L"Job Application", WS_VISIBLE | WS_CHILD, 460, 380, 110, 38, hWnd, (HMENU)GENERATE_BUTTON, NULL, NULL);
 
